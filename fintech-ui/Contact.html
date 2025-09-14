@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact Us - ꪜeraֆpend</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen flex items-center justify-center">
+  <div class="max-w-lg w-full bg-white rounded-xl shadow-lg p-8">
+    <h1 class="text-3xl font-bold text-indigo-600 mb-2 text-center">Contact Us</h1>
+    <p class="text-gray-500 mb-6 text-center">We'd love to hear from you! Fill out the form below and we'll get back to you soon.</p>
+    <form class="space-y-5">
+      <div>
+        <label for="name" class="block text-sm font-medium text-gray-700">Name</label>
+        <input type="text" id="name" name="name" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+      </div>
+      <div>
+        <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+        <input type="email" id="email" name="email" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+      </div>
+      <div>
+        <label for="message" class="block text-sm font-medium text-gray-700">Message</label>
+        <textarea id="message" name="message" rows="4" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"></textarea>
+      </div>
+      <button type="submit" class="w-full py-2 px-4 bg-indigo-600 text-white font-semibold rounded-md shadow hover:bg-indigo-700 transition">Send Message</button>
+      <script>
+        document.querySelector('form').addEventListener('submit', function(event) {
+          event.preventDefault();
+          alert('Thank you for contacting us! We will get back to you soon.');
+          this.reset();
+        });
+      </script>
+    </form>
+    <div class="mt-8 text-center text-gray-400 text-xs">
+      &copy; 2025 ꪜeraֆpend. All rights reserved.
+    </div>
+  </div>
+</body>
+</html>

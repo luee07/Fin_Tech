@@ -1,0 +1,2220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Powered Personal Finance Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.js"></script>
+    
+    <style>
+        /* Reset and Base Styles */
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
+
+        :root {
+          /* Colors */
+          --background: #ffffff;
+          --foreground: #030213;
+          --card: #ffffff;
+          --card-foreground: #030213;
+          --muted: #ececf0;
+          --muted-foreground: #717182;
+          --border: rgba(0, 0, 0, 0.1);
+          --primary: #030213;
+          --primary-foreground: #ffffff;
+          --secondary: #f3f3f5;
+          --accent: #e9ebef;
+          --destructive: #d4183d;
+          --success: #22c55e;
+          --warning: #f59e0b;
+          --info: #3b82f6;
+          
+          /* Spacing */
+          --radius: 0.625rem;
+          --spacing-xs: 0.25rem;
+          --spacing-sm: 0.5rem;
+          --spacing-md: 1rem;
+          --spacing-lg: 1.5rem;
+          --spacing-xl: 2rem;
+          --spacing-2xl: 3rem;
+          
+          /* Typography */
+          --font-size-xs: 0.75rem;
+          --font-size-sm: 0.875rem;
+          --font-size-base: 1rem;
+          --font-size-lg: 1.125rem;
+          --font-size-xl: 1.25rem;
+          --font-size-2xl: 1.5rem;
+          --font-size-3xl: 1.875rem;
+          --font-weight-normal: 400;
+          --font-weight-medium: 500;
+          --font-weight-semibold: 600;
+          --font-weight-bold: 700;
+        }
+
+        @media (prefers-color-scheme: dark) {
+          :root {
+            --background: #0a0a0b;
+            --foreground: #fafafa;
+            --card: #0a0a0b;
+            --card-foreground: #fafafa;
+            --muted: #262626;
+            --muted-foreground: #a3a3a3;
+            --border: rgba(255, 255, 255, 0.1);
+            --primary: #fafafa;
+            --primary-foreground: #0a0a0b;
+            --secondary: #262626;
+            --accent: #262626;
+          }
+        }
+
+        body {
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+          background-color: var(--background);
+          color: var(--foreground);
+          line-height: 1.5;
+          font-size: var(--font-size-base);
+          font-weight: var(--font-weight-normal);
+        }
+
+        .app {
+          min-height: 100vh;
+        }
+
+        /* Navigation */
+        .nav-header {
+          position: sticky;
+          top: 0;
+          z-index: 10;
+          border-bottom: 1px solid var(--border);
+          background-color: rgba(255, 255, 255, 0.95);
+          backdrop-filter: blur(8px);
+        }
+
+        .nav-container {
+          max-width: 80rem;
+          margin: 0 auto;
+          padding: var(--spacing-md) var(--spacing-lg);
+        }
+
+        .nav-tabs {
+          display: inline-grid;
+          grid-template-columns: 1fr 1fr;
+          background-color: var(--muted);
+          border-radius: var(--radius);
+          padding: 4px;
+          width: fit-content;
+        }
+
+        .nav-tab {
+          display: flex;
+          align-items: center;
+          gap: var(--spacing-sm);
+          padding: var(--spacing-sm) var(--spacing-md);
+          border: none;
+          background: transparent;
+          color: var(--muted-foreground);
+          border-radius: calc(var(--radius) - 4px);
+          cursor: pointer;
+          transition: all 0.2s ease;
+          font-weight: var(--font-weight-medium);
+          font-size: var(--font-size-sm);
+        }
+
+        .nav-tab.active {
+          background-color: var(--background);
+          color: var(--foreground);
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-tab:hover:not(.active) {
+          color: var(--foreground);
+        }
+
+        /* Dashboard Layout */
+        .dashboard {
+          display: none;
+          max-width: 80rem;
+          margin: 0 auto;
+          padding: var(--spacing-lg);
+        }
+
+        .dashboard.active {
+          display: block;
+        }
+
+        .dashboard-space {
+          display: flex;
+          flex-direction: column;
+          gap: var(--spacing-lg);
+        }
+
+        /* Dashboard Header */
+        .dashboard-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          flex-wrap: wrap;
+          gap: var(--spacing-md);
+        }
+
+        .dashboard-header h1 {
+          font-size: var(--font-size-3xl);
+          font-weight: var(--font-weight-bold);
+          margin-bottom: var(--spacing-xs);
+        }
+
+        .header-subtitle {
+          color: var(--muted-foreground);
+          font-size: var(--font-size-base);
+        }
+
+        .header-status {
+          display: flex;
+          align-items: center;
+          gap: var(--spacing-md);
+          color: var(--muted-foreground);
+          font-size: var(--font-size-sm);
+          flex-wrap: wrap;
+        }
+
+        .market-status {
+          display: flex;
+          align-items: center;
+          gap: var(--spacing-sm);
+        }
+
+        .status-indicator {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background-color: var(--destructive);
+        }
+
+        .status-indicator.active {
+          background-color: var(--success);
+        }
+
+        .header-actions {
+          display: flex;
+          gap: var(--spacing-sm);
+        }
+
+        /* Buttons */
+        .btn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: var(--spacing-sm);
+          padding: var(--spacing-sm) var(--spacing-md);
+          border-radius: var(--radius);
+          font-weight: var(--font-weight-medium);
+          font-size: var(--font-size-sm);
+          cursor: pointer;
+          transition: all 0.2s ease;
+          border: 1px solid transparent;
+          text-decoration: none;
+          white-space: nowrap;
+        }
+
+        .btn-sm {
+          padding: calc(var(--spacing-sm) / 1.2) var(--spacing-sm);
+          font-size: var(--font-size-xs);
+        }
+
+        .btn-primary {
+          background-color: var(--primary);
+          color: var(--primary-foreground);
+          border-color: var(--primary);
+        }
+
+        .btn-primary:hover {
+          opacity: 0.9;
+        }
+
+        .btn-outline {
+          border: 1px solid var(--border);
+          background-color: transparent;
+          color: var(--foreground);
+        }
+
+        .btn-outline:hover {
+          background-color: var(--accent);
+        }
+
+        .btn.full-width {
+          width: 100%;
+          justify-content: center;
+        }
+
+        /* Cards */
+        .card {
+          background-color: var(--card);
+          border: 1px solid var(--border);
+          border-radius: var(--radius);
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .card-header {
+          padding: var(--spacing-lg);
+          padding-bottom: var(--spacing-md);
+        }
+
+        .card-content {
+          padding: 0 var(--spacing-lg) var(--spacing-lg);
+        }
+
+        .card-title {
+          font-size: var(--font-size-lg);
+          font-weight: var(--font-weight-semibold);
+          margin-bottom: var(--spacing-xs);
+          display: flex;
+          align-items: center;
+          gap: var(--spacing-sm);
+        }
+
+        .card-description {
+          color: var(--muted-foreground);
+          font-size: var(--font-size-sm);
+        }
+
+        /* Grid Systems */
+        .grid {
+          display: grid;
+          gap: var(--spacing-lg);
+        }
+
+        .grid-cols-1 { grid-template-columns: repeat(1, 1fr); }
+        .grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+        .grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
+        .grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
+
+        @media (min-width: 768px) {
+          .md\\:grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+          .md\\:grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
+          .md\\:grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
+        }
+
+        @media (min-width: 1024px) {
+          .lg\\:grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+          .lg\\:grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
+        }
+
+        .grid.auto-fit {
+          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        }
+
+        .grid.auto-fit-large {
+          grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        }
+
+        /* Metric Cards */
+        .metric-card {
+          background-color: var(--card);
+          border: 1px solid var(--border);
+          border-radius: var(--radius);
+          padding: var(--spacing-lg);
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .metric-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: var(--spacing-sm);
+        }
+
+        .metric-title {
+          font-size: var(--font-size-sm);
+          font-weight: var(--font-weight-medium);
+          color: var(--muted-foreground);
+        }
+
+        .metric-icon {
+          color: var(--muted-foreground);
+          font-size: var(--font-size-sm);
+        }
+
+        .metric-value {
+          font-size: var(--font-size-2xl);
+          font-weight: var(--font-weight-bold);
+          margin-bottom: var(--spacing-xs);
+        }
+
+        .metric-change {
+          font-size: var(--font-size-xs);
+          display: flex;
+          align-items: center;
+          gap: var(--spacing-xs);
+          color: var(--muted-foreground);
+        }
+
+        .metric-change.positive {
+          color: var(--success);
+        }
+
+        .metric-change.negative {
+          color: var(--destructive);
+        }
+
+        /* AI Insights */
+        .insights-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+          gap: var(--spacing-md);
+        }
+
+        .insight-item {
+          padding: var(--spacing-md);
+          border-radius: var(--radius);
+          border: 1px solid;
+          display: flex;
+          gap: var(--spacing-md);
+        }
+
+        .insight-item.blue {
+          background-color: rgba(59, 130, 246, 0.05);
+          border-color: rgba(59, 130, 246, 0.2);
+        }
+
+        .insight-item.green {
+          background-color: rgba(34, 197, 94, 0.05);
+          border-color: rgba(34, 197, 94, 0.2);
+        }
+
+        .insight-item.amber {
+          background-color: rgba(245, 158, 11, 0.05);
+          border-color: rgba(245, 158, 11, 0.2);
+        }
+
+        .insight-indicator {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          margin-top: var(--spacing-sm);
+          flex-shrink: 0;
+        }
+
+        .insight-item.blue .insight-indicator {
+          background-color: var(--info);
+        }
+
+        .insight-item.green .insight-indicator {
+          background-color: var(--success);
+        }
+
+        .insight-item.amber .insight-indicator {
+          background-color: var(--warning);
+        }
+
+        .insight-content h4 {
+          font-weight: var(--font-weight-medium);
+          margin-bottom: var(--spacing-xs);
+        }
+
+        .insight-content p {
+          font-size: var(--font-size-sm);
+          line-height: 1.4;
+        }
+
+        .insight-item.blue .insight-content h4 {
+          color: rgb(30, 64, 175);
+        }
+
+        .insight-item.blue .insight-content p {
+          color: rgb(29, 78, 216);
+        }
+
+        .insight-item.green .insight-content h4 {
+          color: rgb(5, 150, 105);
+        }
+
+        .insight-item.green .insight-content p {
+          color: rgb(4, 120, 87);
+        }
+
+        .insight-item.amber .insight-content h4 {
+          color: rgb(146, 64, 14);
+        }
+
+        .insight-item.amber .insight-content p {
+          color: rgb(120, 53, 15);
+        }
+
+        /* Charts */
+        .chart-container {
+          position: relative;
+          height: 300px;
+          margin-bottom: var(--spacing-md);
+        }
+
+        .chart-legend {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+          gap: var(--spacing-sm);
+        }
+
+        .legend-item {
+          display: flex;
+          align-items: center;
+          gap: var(--spacing-sm);
+          font-size: var(--font-size-sm);
+        }
+
+        .legend-color {
+          width: 12px;
+          height: 12px;
+          border-radius: 50%;
+        }
+
+        /* Budget Progress */
+        .budget-item {
+          margin-bottom: var(--spacing-md);
+        }
+
+        .budget-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: var(--spacing-sm);
+        }
+
+        .budget-title {
+          font-weight: var(--font-weight-medium);
+          font-size: var(--font-size-sm);
+        }
+
+        .budget-amounts {
+          display: flex;
+          align-items: center;
+          gap: var(--spacing-sm);
+          font-size: var(--font-size-sm);
+          color: var(--muted-foreground);
+        }
+
+        .badge {
+          background-color: var(--destructive);
+          color: white;
+          padding: 2px var(--spacing-xs);
+          border-radius: 4px;
+          font-size: 10px;
+          font-weight: var(--font-weight-medium);
+        }
+
+        .badge-outline {
+          background-color: transparent;
+          border: 1px solid var(--border);
+          color: var(--muted-foreground);
+          padding: 2px var(--spacing-xs);
+          border-radius: 4px;
+          font-size: 10px;
+        }
+
+        .progress-bar {
+          width: 100%;
+          height: 8px;
+          background-color: var(--muted);
+          border-radius: 4px;
+          overflow: hidden;
+        }
+
+        .progress-fill {
+          height: 100%;
+          background-color: var(--primary);
+          transition: width 0.3s ease;
+        }
+
+        .progress-fill.over-budget {
+          background-color: var(--destructive);
+        }
+
+        /* Transactions */
+        .transaction-item {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: var(--spacing-md);
+          background-color: rgba(236, 236, 240, 0.5);
+          border-radius: var(--radius);
+          margin-bottom: var(--spacing-md);
+        }
+
+        .transaction-details {
+          flex: 1;
+        }
+
+        .transaction-header {
+          display: flex;
+          align-items: center;
+          gap: var(--spacing-sm);
+          margin-bottom: var(--spacing-xs);
+        }
+
+        .transaction-description {
+          font-weight: var(--font-weight-medium);
+        }
+
+        .transaction-date {
+          font-size: var(--font-size-xs);
+          color: var(--muted-foreground);
+        }
+
+        .transaction-amount {
+          font-weight: var(--font-weight-medium);
+        }
+
+        .transaction-amount.positive {
+          color: var(--success);
+        }
+
+        .transaction-amount.negative {
+          color: var(--destructive);
+        }
+
+        /* Market Indices */
+        .indices-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: var(--spacing-md);
+        }
+
+        .index-item {
+          padding: var(--spacing-md);
+          border: 1px solid var(--border);
+          border-radius: var(--radius);
+          background-color: rgba(var(--card), 0.5);
+        }
+
+        .index-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+        }
+
+        .index-name {
+          font-weight: var(--font-weight-medium);
+          margin-bottom: var(--spacing-xs);
+        }
+
+        .index-value {
+          font-size: var(--font-size-lg);
+          font-weight: var(--font-weight-bold);
+        }
+
+        .index-change {
+          text-align: right;
+        }
+
+        .index-change.positive {
+          color: var(--success);
+        }
+
+        .index-change.negative {
+          color: var(--destructive);
+        }
+
+        .index-change-value {
+          display: flex;
+          align-items: center;
+          justify-content: flex-end;
+          gap: var(--spacing-xs);
+          font-size: var(--font-size-sm);
+        }
+
+        .index-change-percent {
+          font-size: var(--font-size-xs);
+        }
+
+        /* Holdings */
+        .holding-item {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: var(--spacing-md);
+          border: 1px solid var(--border);
+          border-radius: var(--radius);
+          background-color: rgba(var(--card), 0.5);
+          margin-bottom: var(--spacing-md);
+        }
+
+        .holding-info {
+          display: flex;
+          align-items: center;
+          gap: var(--spacing-md);
+        }
+
+        .holding-symbol {
+          font-weight: var(--font-weight-bold);
+          margin-bottom: var(--spacing-xs);
+        }
+
+        .holding-name {
+          font-size: var(--font-size-sm);
+          color: var(--muted-foreground);
+        }
+
+        .holding-shares {
+          background-color: transparent;
+          border: 1px solid var(--border);
+          color: var(--muted-foreground);
+          padding: 2px var(--spacing-xs);
+          border-radius: 4px;
+          font-size: 10px;
+          margin-left: var(--spacing-sm);
+        }
+
+        .holding-chart {
+          width: 60px;
+          height: 30px;
+        }
+
+        .holding-price {
+          text-align: right;
+          margin-right: var(--spacing-md);
+        }
+
+        .holding-current-price {
+          font-weight: var(--font-weight-medium);
+          margin-bottom: var(--spacing-xs);
+        }
+
+        .holding-change {
+          font-size: var(--font-size-sm);
+          display: flex;
+          align-items: center;
+          gap: var(--spacing-xs);
+        }
+
+        .holding-change.positive {
+          color: var(--success);
+        }
+
+        .holding-change.negative {
+          color: var(--destructive);
+        }
+
+        .holding-value {
+          text-align: right;
+        }
+
+        .holding-total-value {
+          font-weight: var(--font-weight-medium);
+          margin-bottom: var(--spacing-xs);
+        }
+
+        .holding-value-label {
+          font-size: var(--font-size-sm);
+          color: var(--muted-foreground);
+        }
+
+        /* Watchlist */
+        .watchlist-search {
+          display: flex;
+          gap: var(--spacing-sm);
+          margin-bottom: var(--spacing-lg);
+          position: relative;
+        }
+
+        .search-input {
+          flex: 1;
+          padding: var(--spacing-sm) var(--spacing-md);
+          padding-left: 2.5rem;
+          border: 1px solid var(--border);
+          border-radius: var(--radius);
+          background-color: var(--background);
+          color: var(--foreground);
+          font-size: var(--font-size-sm);
+        }
+
+        .search-input:focus {
+          outline: none;
+          border-color: var(--primary);
+        }
+
+        .search-icon {
+          position: absolute;
+          left: var(--spacing-sm);
+          top: 50%;
+          transform: translateY(-50%);
+          color: var(--muted-foreground);
+          font-size: var(--font-size-sm);
+        }
+
+        .watchlist-item {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: var(--spacing-md);
+          background-color: rgba(236, 236, 240, 0.5);
+          border-radius: var(--radius);
+          margin-bottom: var(--spacing-md);
+        }
+
+        .watchlist-info {
+          display: flex;
+          align-items: center;
+          gap: var(--spacing-md);
+        }
+
+        .watchlist-star {
+          color: var(--warning);
+        }
+
+        .watchlist-symbol {
+          font-weight: var(--font-weight-medium);
+          margin-bottom: var(--spacing-xs);
+        }
+
+        .watchlist-name {
+          font-size: var(--font-size-sm);
+          color: var(--muted-foreground);
+        }
+
+        .watchlist-price {
+          text-align: right;
+        }
+
+        .watchlist-current-price {
+          font-weight: var(--font-weight-medium);
+          margin-bottom: var(--spacing-xs);
+        }
+
+        .watchlist-change {
+          font-size: var(--font-size-sm);
+          display: flex;
+          align-items: center;
+          justify-content: flex-end;
+          gap: var(--spacing-xs);
+        }
+
+        .watchlist-change.positive {
+          color: var(--success);
+        }
+
+        .watchlist-change.negative {
+          color: var(--destructive);
+        }
+
+        /* Utilities */
+        .text-positive { color: var(--success); }
+        .text-negative { color: var(--destructive); }
+        .text-muted { color: var(--muted-foreground); }
+        .text-xs { font-size: var(--font-size-xs); }
+        .text-sm { font-size: var(--font-size-sm); }
+        .text-lg { font-size: var(--font-size-lg); }
+        .text-xl { font-size: var(--font-size-xl); }
+        .text-2xl { font-size: var(--font-size-2xl); }
+        .text-3xl { font-size: var(--font-size-3xl); }
+        .font-medium { font-weight: var(--font-weight-medium); }
+        .font-semibold { font-weight: var(--font-weight-semibold); }
+        .font-bold { font-weight: var(--font-weight-bold); }
+
+        .space-y-3 > * + * { margin-top: 0.75rem; }
+        .space-y-4 > * + * { margin-top: 1rem; }
+        .space-y-6 > * + * { margin-top: 1.5rem; }
+
+        .mb-4 { margin-bottom: 1rem; }
+        .mt-4 { margin-top: 1rem; }
+
+        .flex { display: flex; }
+        .items-center { align-items: center; }
+        .justify-between { justify-content: space-between; }
+        .gap-2 { gap: 0.5rem; }
+        .gap-3 { gap: 0.75rem; }
+        .gap-4 { gap: 1rem; }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+          .dashboard {
+            padding: var(--spacing-md);
+          }
+          
+          .dashboard-header {
+            flex-direction: column;
+            align-items: stretch;
+          }
+          
+          .header-actions {
+            justify-content: stretch;
+          }
+          
+          .header-actions .btn {
+            flex: 1;
+            justify-content: center;
+          }
+          
+          .grid.auto-fit,
+          .grid.auto-fit-large {
+            grid-template-columns: 1fr;
+          }
+          
+          .insights-grid {
+            grid-template-columns: 1fr;
+          }
+          
+          .indices-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+          
+          .nav-container {
+            padding: var(--spacing-sm) var(--spacing-md);
+          }
+        }
+
+        @media (max-width: 480px) {
+          .indices-grid {
+            grid-template-columns: 1fr;
+          }
+          
+          .holding-item,
+          .watchlist-item,
+          .transaction-item {
+            flex-direction: column;
+            align-items: stretch;
+            gap: var(--spacing-sm);
+          }
+          
+          .holding-info,
+          .watchlist-info {
+            justify-content: space-between;
+          }
+          
+          .holding-price,
+          .watchlist-price,
+          .transaction-amount {
+            text-align: left;
+          }
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <!-- Header Navigation -->
+        <div class="nav-header">
+            <div class="nav-container">
+                <div class="nav-tabs">
+                    <button class="nav-tab active" data-tab="finance">
+                        <i class="fas fa-wallet"></i>
+                        Finance
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Finance Dashboard -->
+        <div id="finance-dashboard" class="dashboard active">
+            <div class="dashboard-space">
+                <!-- Header -->
+                <div class="dashboard-header">
+                    <div class="header-content">
+                        <h1>Financial Dashboard</h1>
+                        <p class="header-subtitle">AI-powered insights for your money</p>
+                    </div>
+                    <div class="header-actions">
+                        <button class="btn btn-outline btn-sm">
+                            <i class="fas fa-calendar"></i>
+                            This Month
+                        </button>
+                        <button class="btn btn-primary btn-sm" id="add-transaction-btn">
+                            <i class="fas fa-plus"></i>
+                            Add Transaction
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Key Metrics -->
+                <div class="grid auto-fit">
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <span class="metric-title">Total Balance</span>
+                            <i class="fas fa-dollar-sign metric-icon"></i>
+                        </div>
+                        <div class="metric-value" id="total-balance">$2,380</div>
+                        <div class="metric-change positive">
+                            <i class="fas fa-arrow-up"></i>
+                            +12.5% from last month
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <span class="metric-title">Monthly Income</span>
+                            <i class="fas fa-arrow-up metric-icon"></i>
+                        </div>
+                        <div class="metric-value" id="monthly-income">$7,100</div>
+                        <div class="metric-change positive">+8.2% from last month</div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <span class="metric-title">Monthly Expenses</span>
+                            <i class="fas fa-credit-card metric-icon"></i>
+                        </div>
+                        <div class="metric-value" id="monthly-expenses">$4,720</div>
+                        <div class="metric-change negative">
+                            <i class="fas fa-arrow-down"></i>
+                            +3.1% from last month
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <span class="metric-title">Savings Rate</span>
+                            <i class="fas fa-target metric-icon"></i>
+                        </div>
+                        <div class="metric-value" id="savings-rate">33.5%</div>
+                        <div class="metric-change positive">Above target of 30%</div>
+                    </div>
+                </div>
+
+                <!-- AI Insights -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-brain"></i>
+                            AI Financial Insights
+                        </h3>
+                        <p class="card-description">Personalized recommendations based on your spending patterns</p>
+                    </div>
+                    <div class="card-content">
+                        <div class="insights-grid">
+                            <div class="insight-item blue">
+                                <div class="insight-indicator"></div>
+                                <div class="insight-content">
+                                    <h4>Budget Optimization</h4>
+                                    <p>You're spending 17% more on food than similar users. Consider meal planning to save $200/month.</p>
+                                </div>
+                            </div>
+                            <div class="insight-item green">
+                                <div class="insight-indicator"></div>
+                                <div class="insight-content">
+                                    <h4>Savings Opportunity</h4>
+                                    <p>Great job! Your savings rate is above average. Consider investing the extra $500 in index funds.</p>
+                                </div>
+                            </div>
+                            <div class="insight-item amber">
+                                <div class="insight-indicator"></div>
+                                <div class="insight-content">
+                                    <h4>Subscription Alert</h4>
+                                    <p>You have 3 unused subscriptions totaling $45/month. Consider canceling them.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Section -->
+                <div class="grid auto-fit-large">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Spending by Category</h3>
+                            <p class="card-description">Your expenses breakdown for this month</p>
+                        </div>
+                        <div class="card-content">
+                            <div class="chart-container">
+                                <canvas id="spending-chart"></canvas>
+                            </div>
+                            <div class="chart-legend" id="spending-legend"></div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Income vs Expenses</h3>
+                            <p class="card-description">Your financial trends over the last 6 months</p>
+                        </div>
+                        <div class="card-content">
+                            <div class="chart-container">
+                                <canvas id="trends-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Budget and Transactions -->
+                <div class="grid auto-fit-large">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Budget Progress</h3>
+                            <p class="card-description">How you're tracking against your monthly budgets</p>
+                        </div>
+                        <div class="card-content">
+                            <div id="budget-list"></div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Recent Transactions</h3>
+                            <p class="card-description">Your latest financial activity</p>
+                        </div>
+                        <div class="card-content">
+                            <div id="transactions-list"></div>
+                            <button class="btn btn-outline full-width mt-4">
+                                <i class="fas fa-filter"></i>
+                                View All Transactions
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Investment Dashboard -->
+        <div id="investment-dashboard" class="dashboard">
+            <div class="dashboard-space">
+                <!-- Header -->
+                <div class="dashboard-header">
+                    <div class="header-content">
+                        <h1>Investment Portfolio</h1>
+                        <div class="header-status">
+                            <p>Real-time market data</p>
+                            <div class="market-status">
+                                <div class="status-indicator active"></div>
+                                <span>Market Open</span>
+                            </div>
+                            <span class="current-time" id="current-time"></span>
+                        </div>
+                    </div>
+                    <div class="header-actions">
+                        <button class="btn btn-outline btn-sm" id="refresh-btn">
+                            <i class="fas fa-sync-alt"></i>
+                            Refresh
+                        </button>
+                        <button class="btn btn-primary btn-sm" id="buy-stock-btn">
+                            <i class="fas fa-plus"></i>
+                            Buy Stock
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Investment Metrics -->
+                <div class="grid auto-fit">
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <span class="metric-title">Portfolio Value</span>
+                            <i class="fas fa-dollar-sign metric-icon"></i>
+                        </div>
+                        <div class="metric-value" id="portfolio-value">$136,788</div>
+                        <div class="metric-change positive" id="portfolio-change">
+                            <i class="fas fa-arrow-up"></i>
+                            +$3,247.89 (+2.43%)
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <span class="metric-title">Day's Gain/Loss</span>
+                            <i class="fas fa-activity metric-icon"></i>
+                        </div>
+                        <div class="metric-value positive" id="day-gain-loss">+$1,247.89</div>
+                        <div class="metric-change positive">+0.92% today</div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <span class="metric-title">Cash Available</span>
+                            <i class="fas fa-dollar-sign metric-icon"></i>
+                        </div>
+                        <div class="metric-value">$15,234</div>
+                        <div class="metric-change">Ready to invest</div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <span class="metric-title">Dividend Income</span>
+                            <i class="fas fa-arrow-up metric-icon"></i>
+                        </div>
+                        <div class="metric-value">$342.56</div>
+                        <div class="metric-change positive">This month</div>
+                    </div>
+                </div>
+
+                <!-- Market Indices -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Market Indices</h3>
+                        <p class="card-description">Major market performance indicators</p>
+                    </div>
+                    <div class="card-content">
+                        <div class="indices-grid" id="market-indices"></div>
+                    </div>
+                </div>
+
+                <!-- Portfolio Charts -->
+                <div class="grid auto-fit-large">
+                    <div class="card" style="grid-column: span 2;">
+                        <div class="card-header">
+                            <h3 class="card-title">Portfolio Performance</h3>
+                            <p class="card-description">Your investment growth over time</p>
+                        </div>
+                        <div class="card-content">
+                            <div class="chart-container">
+                                <canvas id="portfolio-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Asset Allocation</h3>
+                            <p class="card-description">Portfolio distribution by sector</p>
+                        </div>
+                        <div class="card-content">
+                            <div class="chart-container" style="height: 200px;">
+                                <canvas id="allocation-chart"></canvas>
+                            </div>
+                            <div class="chart-legend" id="allocation-legend"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Holdings and Watchlist -->
+                <div class="grid auto-fit-large">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Stock Holdings</h3>
+                            <p class="card-description">Your current equity positions</p>
+                        </div>
+                        <div class="card-content">
+                            <div id="holdings-list"></div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Watchlist</h3>
+                            <p class="card-description">Stocks you're monitoring</p>
+                        </div>
+                        <div class="card-content">
+                            <div class="watchlist-search">
+                                <i class="fas fa-search search-icon"></i>
+                                <input type="text" placeholder="Add stock to watchlist..." class="search-input" id="watchlist-input">
+                                <button class="btn btn-outline btn-sm" id="add-watchlist-btn">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                            <div id="watchlist-list"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample data for the financial dashboard
+        const FinanceData = {
+          // Spending data for pie chart
+          spendingData: [
+            { category: 'Food & Dining', amount: 1250, budget: 1500, color: '#0088FE' },
+            { category: 'Transportation', amount: 850, budget: 1000, color: '#00C49F' },
+            { category: 'Shopping', amount: 650, budget: 800, color: '#FFBB28' },
+            { category: 'Entertainment', amount: 450, budget: 600, color: '#FF8042' },
+            { category: 'Bills & Utilities', amount: 1200, budget: 1200, color: '#8884D8' },
+            { category: 'Healthcare', amount: 320, budget: 500, color: '#82CA9D' },
+          ],
+
+          // Monthly trends for line chart
+          monthlyTrends: [
+            { month: 'Jan', income: 6500, expenses: 4200 },
+            { month: 'Feb', income: 6800, expenses: 4500 },
+            { month: 'Mar', income: 6500, expenses: 4100 },
+            { month: 'Apr', income: 7200, expenses: 4800 },
+            { month: 'May', income: 6900, expenses: 4650 },
+            { month: 'Jun', income: 7100, expenses: 4720 },
+          ],
+
+          // Recent transactions
+          recentTransactions: [
+            { id: 1, description: 'Grocery Store', amount: -89.50, category: 'Food & Dining', date: '2025-09-13', type: 'expense' },
+            { id: 2, description: 'Salary Deposit', amount: 3200.00, category: 'Income', date: '2025-09-12', type: 'income' },
+            { id: 3, description: 'Gas Station', amount: -45.20, category: 'Transportation', date: '2025-09-12', type: 'expense' },
+            { id: 4, description: 'Netflix Subscription', amount: -15.99, category: 'Entertainment', date: '2025-09-11', type: 'expense' },
+            { id: 5, description: 'Freelance Payment', amount: 850.00, category: 'Income', date: '2025-09-10', type: 'income' },
+          ]
+        };
+
+        // Sample data for the investment dashboard
+        const InvestmentData = {
+          // Portfolio allocation for pie chart
+          portfolioAllocation: [
+            { sector: 'Technology', value: 45000, percentage: 35, color: '#0088FE' },
+            { sector: 'Healthcare', value: 32000, percentage: 25, color: '#00C49F' },
+            { sector: 'Finance', value: 25600, percentage: 20, color: '#FFBB28' },
+            { sector: 'Energy', value: 16000, percentage: 12.5, color: '#FF8042' },
+            { sector: 'Real Estate', value: 9600, percentage: 7.5, color: '#8884D8' },
+          ],
+
+          // Stock holdings
+          stockHoldings: [
+            { 
+              symbol: 'AAPL', 
+              name: 'Apple Inc.', 
+              shares: 50, 
+              currentPrice: 178.45, 
+              avgCost: 165.30, 
+              change: 2.35, 
+              changePercent: 1.33,
+              value: 8922.50,
+              dayData: [175, 176.5, 178, 177.2, 178.45]
+            },
+            { 
+              symbol: 'MSFT', 
+              name: 'Microsoft Corp.', 
+              shares: 30, 
+              currentPrice: 332.89, 
+              avgCost: 310.25, 
+              change: -1.85, 
+              changePercent: -0.55,
+              value: 9986.70,
+              dayData: [335, 334, 332.5, 331, 332.89]
+            },
+            { 
+              symbol: 'GOOGL', 
+              name: 'Alphabet Inc.', 
+              shares: 25, 
+              currentPrice: 135.67, 
+              avgCost: 142.80, 
+              change: 3.21, 
+              changePercent: 2.42,
+              value: 3391.75,
+              dayData: [132, 133.5, 134.8, 135.1, 135.67]
+            },
+            { 
+              symbol: 'TSLA', 
+              name: 'Tesla Inc.', 
+              shares: 15, 
+              currentPrice: 248.92, 
+              avgCost: 267.45, 
+              change: -5.67, 
+              changePercent: -2.23,
+              value: 3733.80,
+              dayData: [252, 250, 248, 249.5, 248.92]
+            },
+            { 
+              symbol: 'NVDA', 
+              name: 'NVIDIA Corp.', 
+              shares: 12, 
+              currentPrice: 421.13, 
+              avgCost: 385.20, 
+              change: 8.45, 
+              changePercent: 2.05,
+              value: 5053.56,
+              dayData: [415, 418, 420, 419, 421.13]
+            }
+          ],
+
+          // Market indices
+          marketIndices: [
+            { name: 'S&P 500', value: 4567.89, change: 23.45, changePercent: 0.52 },
+            { name: 'NASDAQ', value: 14234.67, change: -45.32, changePercent: -0.32 },
+            { name: 'DOW JONES', value: 35678.90, change: 156.78, changePercent: 0.44 },
+            { name: 'RUSSELL 2000', value: 1987.65, change: -12.34, changePercent: -0.62 }
+          ],
+
+          // Watchlist
+          watchlist: [
+            { symbol: 'AMZN', name: 'Amazon.com Inc.', price: 134.56, change: 2.89, changePercent: 2.19 },
+            { symbol: 'META', name: 'Meta Platforms Inc.', price: 298.34, change: -4.23, changePercent: -1.40 },
+            { symbol: 'NFLX', name: 'Netflix Inc.', price: 445.67, change: 12.45, changePercent: 2.87 },
+            { symbol: 'AMD', name: 'Advanced Micro Devices', price: 102.78, change: -1.23, changePercent: -1.18 }
+          ],
+
+          // Portfolio performance over time
+          portfolioPerformance: [
+            { date: '1W', value: 128500 },
+            { date: '2W', value: 131200 },
+            { date: '3W', value: 129800 },
+            { date: '4W', value: 132400 },
+            { date: '5W', value: 128900 },
+            { date: '6W', value: 134600 },
+            { date: 'Now', value: 136788 }
+          ]
+        };
+
+        // Utility functions
+        const Utils = {
+          formatCurrency: function(amount, showSign = false) {
+            const formatted = Math.abs(amount).toLocaleString('en-US', {
+              style: 'currency',
+              currency: 'USD',
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2
+            });
+            
+            if (showSign && amount !== 0) {
+              return amount > 0 ? `+${formatted}` : `-${formatted}`;
+            }
+            
+            return formatted;
+          },
+
+          formatPercent: function(percent, showSign = false) {
+            const formatted = Math.abs(percent).toFixed(2) + '%';
+            
+            if (showSign && percent !== 0) {
+              return percent > 0 ? `+${formatted}` : `-${formatted}`;
+            }
+            
+            return formatted;
+          },
+
+          formatDate: function(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric'
+            });
+          },
+
+          getChangeClass: function(value) {
+            if (value > 0) return 'positive';
+            if (value < 0) return 'negative';
+            return '';
+          },
+
+          getChangeIcon: function(value) {
+            if (value > 0) return 'fas fa-arrow-up';
+            if (value < 0) return 'fas fa-arrow-down';
+            return '';
+          }
+        };
+
+        // Chart.js configurations and utilities
+        const ChartUtils = {
+          // Common chart options
+          getCommonOptions: function() {
+            return {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  display: false
+                }
+              }
+            };
+          },
+
+          // Create spending pie chart
+          createSpendingChart: function() {
+            const ctx = document.getElementById('spending-chart');
+            if (!ctx) return;
+
+            const data = FinanceData.spendingData;
+            
+            new Chart(ctx, {
+              type: 'doughnut',
+              data: {
+                labels: data.map(item => item.category),
+                datasets: [{
+                  data: data.map(item => item.amount),
+                  backgroundColor: data.map(item => item.color),
+                  borderWidth: 0,
+                  cutout: '60%'
+                }]
+              },
+              options: {
+                ...this.getCommonOptions(),
+                plugins: {
+                  legend: {
+                    display: false
+                  },
+                  tooltip: {
+                    callbacks: {
+                      label: function(context) {
+                        return context.label + ': ' + Utils.formatCurrency(context.parsed);
+                      }
+                    }
+                  }
+                }
+              }
+            });
+
+            // Create legend
+            this.createSpendingLegend();
+          },
+
+          // Create spending legend
+          createSpendingLegend: function() {
+            const legendContainer = document.getElementById('spending-legend');
+            if (!legendContainer) return;
+
+            const data = FinanceData.spendingData;
+            legendContainer.innerHTML = '';
+
+            data.forEach(item => {
+              const legendItem = document.createElement('div');
+              legendItem.className = 'legend-item';
+              legendItem.innerHTML = `
+                <div class="legend-color" style="background-color: ${item.color}"></div>
+                <span>${item.category}</span>
+              `;
+              legendContainer.appendChild(legendItem);
+            });
+          },
+
+          // Create income vs expenses trend chart
+          createTrendsChart: function() {
+            const ctx = document.getElementById('trends-chart');
+            if (!ctx) return;
+
+            const data = FinanceData.monthlyTrends;
+            
+            new Chart(ctx, {
+              type: 'line',
+              data: {
+                labels: data.map(item => item.month),
+                datasets: [
+                  {
+                    label: 'Income',
+                    data: data.map(item => item.income),
+                    borderColor: '#22c55e',
+                    backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                    borderWidth: 2,
+                    fill: false,
+                    tension: 0.4
+                  },
+                  {
+                    label: 'Expenses',
+                    data: data.map(item => item.expenses),
+                    borderColor: '#ef4444',
+                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                    borderWidth: 2,
+                    fill: false,
+                    tension: 0.4
+                  }
+                ]
+              },
+              options: {
+                ...this.getCommonOptions(),
+                plugins: {
+                  legend: {
+                    display: true,
+                    position: 'top'
+                  },
+                  tooltip: {
+                    callbacks: {
+                      label: function(context) {
+                        return context.dataset.label + ': ' + Utils.formatCurrency(context.parsed.y);
+                      }
+                    }
+                  }
+                },
+                scales: {
+                  y: {
+                    beginAtZero: false,
+                    ticks: {
+                      callback: function(value) {
+                        return Utils.formatCurrency(value);
+                      }
+                    }
+                  }
+                }
+              }
+            });
+          },
+
+          // Create portfolio performance chart
+          createPortfolioChart: function() {
+            const ctx = document.getElementById('portfolio-chart');
+            if (!ctx) return;
+
+            const data = InvestmentData.portfolioPerformance;
+            
+            new Chart(ctx, {
+              type: 'line',
+              data: {
+                labels: data.map(item => item.date),
+                datasets: [{
+                  label: 'Portfolio Value',
+                  data: data.map(item => item.value),
+                  borderColor: '#22c55e',
+                  backgroundColor: function(context) {
+                    const chart = context.chart;
+                    const {ctx, chartArea} = chart;
+                    if (!chartArea) return null;
+                    
+                    const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+                    gradient.addColorStop(0, 'rgba(34, 197, 94, 0.3)');
+                    gradient.addColorStop(1, 'rgba(34, 197, 94, 0.05)');
+                    return gradient;
+                  },
+                  borderWidth: 2,
+                  fill: true,
+                  tension: 0.4,
+                  pointBackgroundColor: '#22c55e',
+                  pointBorderColor: '#ffffff',
+                  pointBorderWidth: 2,
+                  pointRadius: 4
+                }]
+              },
+              options: {
+                ...this.getCommonOptions(),
+                plugins: {
+                  legend: {
+                    display: false
+                  },
+                  tooltip: {
+                    callbacks: {
+                      label: function(context) {
+                        return 'Portfolio Value: ' + Utils.formatCurrency(context.parsed.y);
+                      }
+                    }
+                  }
+                },
+                scales: {
+                  y: {
+                    beginAtZero: false,
+                    ticks: {
+                      callback: function(value) {
+                        return Utils.formatCurrency(value);
+                      }
+                    }
+                  }
+                }
+              }
+            });
+          },
+
+          // Create portfolio allocation chart
+          createAllocationChart: function() {
+            const ctx = document.getElementById('allocation-chart');
+            if (!ctx) return;
+
+            const data = InvestmentData.portfolioAllocation;
+            
+            new Chart(ctx, {
+              type: 'doughnut',
+              data: {
+                labels: data.map(item => item.sector),
+                datasets: [{
+                  data: data.map(item => item.value),
+                  backgroundColor: data.map(item => item.color),
+                  borderWidth: 0,
+                  cutout: '50%'
+                }]
+              },
+              options: {
+                ...this.getCommonOptions(),
+                plugins: {
+                  legend: {
+                    display: false
+                  },
+                  tooltip: {
+                    callbacks: {
+                      label: function(context) {
+                        const item = data[context.dataIndex];
+                        return context.label + ': ' + Utils.formatCurrency(context.parsed) + ' (' + item.percentage + '%)';
+                      }
+                    }
+                  }
+                }
+              }
+            });
+
+            // Create allocation legend
+            this.createAllocationLegend();
+          },
+
+          // Create allocation legend
+          createAllocationLegend: function() {
+            const legendContainer = document.getElementById('allocation-legend');
+            if (!legendContainer) return;
+
+            const data = InvestmentData.portfolioAllocation;
+            legendContainer.innerHTML = '';
+
+            data.forEach(item => {
+              const legendItem = document.createElement('div');
+              legendItem.className = 'legend-item';
+              legendItem.innerHTML = `
+                <div class="legend-color" style="background-color: ${item.color}"></div>
+                <span>${item.sector}</span>
+                <span style="margin-left: auto; font-weight: 500;">${item.percentage}%</span>
+              `;
+              legendItem.style.justifyContent = 'space-between';
+              legendContainer.appendChild(legendItem);
+            });
+          },
+
+          // Create mini chart for stock holdings
+          createMiniChart: function(canvasId, data, isPositive) {
+            const ctx = document.getElementById(canvasId);
+            if (!ctx) return;
+
+            const color = isPositive ? '#22c55e' : '#ef4444';
+            
+            new Chart(ctx, {
+              type: 'line',
+              data: {
+                labels: data.map((_, index) => index),
+                datasets: [{
+                  data: data,
+                  borderColor: color,
+                  backgroundColor: 'transparent',
+                  borderWidth: 2,
+                  fill: false,
+                  tension: 0.4,
+                  pointRadius: 0,
+                  pointHoverRadius: 0
+                }]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: { display: false },
+                  tooltip: { enabled: false }
+                },
+                scales: {
+                  x: { display: false },
+                  y: { display: false }
+                },
+                elements: {
+                  point: { radius: 0 }
+                }
+              }
+            });
+          }
+        };
+
+        // Finance dashboard functionality
+        const FinanceDashboard = {
+          
+          // Initialize the finance dashboard
+          init: function() {
+            this.renderBudgetProgress();
+            this.renderTransactions();
+            this.updateMetrics();
+          },
+
+          // Update financial metrics
+          updateMetrics: function() {
+            const trends = FinanceData.monthlyTrends;
+            const latestMonth = trends[trends.length - 1];
+            const netSavings = latestMonth.income - latestMonth.expenses;
+            const savingsRate = (netSavings / latestMonth.income) * 100;
+
+            document.getElementById('total-balance').textContent = Utils.formatCurrency(netSavings);
+            document.getElementById('monthly-income').textContent = Utils.formatCurrency(latestMonth.income);
+            document.getElementById('monthly-expenses').textContent = Utils.formatCurrency(latestMonth.expenses);
+            document.getElementById('savings-rate').textContent = Utils.formatPercent(savingsRate);
+          },
+
+          // Render budget progress bars
+          renderBudgetProgress: function() {
+            const container = document.getElementById('budget-list');
+            if (!container) return;
+
+            const data = FinanceData.spendingData;
+            container.innerHTML = '';
+
+            data.forEach(item => {
+              const percentage = (item.amount / item.budget) * 100;
+              const isOverBudget = percentage > 100;
+              
+              const budgetItem = document.createElement('div');
+              budgetItem.className = 'budget-item';
+              
+              budgetItem.innerHTML = `
+                <div class="budget-header">
+                  <span class="budget-title">${item.category}</span>
+                  <div class="budget-amounts">
+                    <span>${Utils.formatCurrency(item.amount)} / ${Utils.formatCurrency(item.budget)}</span>
+                    ${isOverBudget ? '<span class="badge">Over</span>' : ''}
+                  </div>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill ${isOverBudget ? 'over-budget' : ''}" 
+                       style="width: ${Math.min(percentage, 100)}%"></div>
+                </div>
+              `;
+              
+              container.appendChild(budgetItem);
+            });
+          },
+
+          // Render recent transactions
+          renderTransactions: function() {
+            const container = document.getElementById('transactions-list');
+            if (!container) return;
+
+            const data = FinanceData.recentTransactions;
+            container.innerHTML = '';
+
+            data.forEach(transaction => {
+              const transactionItem = document.createElement('div');
+              transactionItem.className = 'transaction-item';
+              
+              const changeClass = Utils.getChangeClass(transaction.amount);
+              const formattedAmount = Utils.formatCurrency(Math.abs(transaction.amount));
+              const sign = transaction.type === 'income' ? '+' : '';
+              
+              transactionItem.innerHTML = `
+                <div class="transaction-details">
+                  <div class="transaction-header">
+                    <span class="transaction-description">${transaction.description}</span>
+                    <span class="badge-outline">${transaction.category}</span>
+                  </div>
+                  <span class="transaction-date">${Utils.formatDate(transaction.date)}</span>
+                </div>
+                <span class="transaction-amount ${changeClass}">
+                  ${sign}${formattedAmount}
+                </span>
+              `;
+              
+              container.appendChild(transactionItem);
+            });
+          },
+
+          // Handle add transaction button click
+          handleAddTransaction: function() {
+            const sampleTransactions = [
+              { description: 'Coffee Shop', amount: 12.50, category: 'Food & Dining', type: 'expense' },
+              { description: 'Bonus Payment', amount: 500.00, category: 'Income', type: 'income' },
+              { description: 'Uber Ride', amount: 18.75, category: 'Transportation', type: 'expense' },
+              { description: 'Gym Membership', amount: 45.00, category: 'Healthcare', type: 'expense' }
+            ];
+            
+            const randomTransaction = sampleTransactions[Math.floor(Math.random() * sampleTransactions.length)];
+            const newTransaction = {
+              id: Date.now(),
+              description: randomTransaction.description,
+              amount: randomTransaction.type === 'expense' ? -Math.abs(randomTransaction.amount) : Math.abs(randomTransaction.amount),
+              category: randomTransaction.category,
+              date: new Date().toISOString().split('T')[0],
+              type: randomTransaction.type
+            };
+            
+            FinanceData.recentTransactions.unshift(newTransaction);
+            
+            if (FinanceData.recentTransactions.length > 5) {
+              FinanceData.recentTransactions = FinanceData.recentTransactions.slice(0, 5);
+            }
+            
+            this.renderTransactions();
+            this.showNotification('Transaction added successfully!');
+          },
+
+          // Show notification
+          showNotification: function(message) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+              position: fixed;
+              top: 20px;
+              right: 20px;
+              background: var(--success);
+              color: white;
+              padding: 12px 20px;
+              border-radius: var(--radius);
+              z-index: 1000;
+              font-size: 14px;
+              font-weight: 500;
+              box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+              transform: translateX(100%);
+              transition: transform 0.3s ease;
+            `;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+              notification.style.transform = 'translateX(0)';
+            }, 100);
+            
+            setTimeout(() => {
+              notification.style.transform = 'translateX(100%)';
+              setTimeout(() => {
+                document.body.removeChild(notification);
+              }, 300);
+            }, 3000);
+          }
+        };
+
+        // Investment dashboard functionality
+        const InvestmentDashboard = {
+          
+          // Initialize the investment dashboard
+          init: function() {
+            this.renderMarketIndices();
+            this.renderStockHoldings();
+            this.renderWatchlist();
+            this.updateTime();
+            this.startTimeUpdater();
+            this.updatePortfolioMetrics();
+          },
+
+          // Render market indices
+          renderMarketIndices: function() {
+            const container = document.getElementById('market-indices');
+            if (!container) return;
+
+            const data = InvestmentData.marketIndices;
+            container.innerHTML = '';
+
+            data.forEach(index => {
+              const changeClass = Utils.getChangeClass(index.change);
+              const changeIcon = Utils.getChangeIcon(index.change);
+              
+              const indexItem = document.createElement('div');
+              indexItem.className = 'index-item';
+              
+              indexItem.innerHTML = `
+                <div class="index-header">
+                  <div>
+                    <h4 class="index-name">${index.name}</h4>
+                    <div class="index-value">${index.value.toLocaleString()}</div>
+                  </div>
+                  <div class="index-change ${changeClass}">
+                    <div class="index-change-value">
+                      ${changeIcon ? `<i class="${changeIcon}"></i>` : ''}
+                      ${Utils.formatCurrency(Math.abs(index.change), true)}
+                    </div>
+                    <div class="index-change-percent">
+                      (${Utils.formatPercent(index.changePercent, true)})
+                    </div>
+                  </div>
+                </div>
+              `;
+              
+              container.appendChild(indexItem);
+            });
+          },
+
+          // Render stock holdings
+          renderStockHoldings: function() {
+            const container = document.getElementById('holdings-list');
+            if (!container) return;
+
+            const data = InvestmentData.stockHoldings;
+            container.innerHTML = '';
+
+            data.forEach((stock, index) => {
+              const changeClass = Utils.getChangeClass(stock.change);
+              const changeIcon = Utils.getChangeIcon(stock.change);
+              const chartId = `mini-chart-${index}`;
+              
+              const holdingItem = document.createElement('div');
+              holdingItem.className = 'holding-item';
+              
+              holdingItem.innerHTML = `
+                <div class="holding-info">
+                  <div>
+                    <div class="holding-symbol">
+                      ${stock.symbol}
+                      <span class="holding-shares">${stock.shares} shares</span>
+                    </div>
+                    <div class="holding-name">${stock.name}</div>
+                  </div>
+                </div>
+                <div class="holding-chart">
+                  <canvas id="${chartId}" width="60" height="30"></canvas>
+                </div>
+                <div class="holding-price">
+                  <div class="holding-current-price">${Utils.formatCurrency(stock.currentPrice)}</div>
+                  <div class="holding-change ${changeClass}">
+                    ${changeIcon ? `<i class="${changeIcon}"></i>` : ''}
+                    ${Utils.formatCurrency(Math.abs(stock.change), true)} 
+                    (${Utils.formatPercent(stock.changePercent, true)})
+                  </div>
+                </div>
+                <div class="holding-value">
+                  <div class="holding-total-value">${Utils.formatCurrency(stock.value)}</div>
+                  <div class="holding-value-label">Value</div>
+                </div>
+              `;
+              
+              container.appendChild(holdingItem);
+              
+              setTimeout(() => {
+                ChartUtils.createMiniChart(chartId, stock.dayData, stock.change >= 0);
+              }, 100);
+            });
+          },
+
+          // Render watchlist
+          renderWatchlist: function() {
+            const container = document.getElementById('watchlist-list');
+            if (!container) return;
+
+            const data = InvestmentData.watchlist;
+            container.innerHTML = '';
+
+            data.forEach(stock => {
+              const changeClass = Utils.getChangeClass(stock.change);
+              const changeIcon = Utils.getChangeIcon(stock.change);
+              
+              const watchlistItem = document.createElement('div');
+              watchlistItem.className = 'watchlist-item';
+              
+              watchlistItem.innerHTML = `
+                <div class="watchlist-info">
+                  <i class="fas fa-star watchlist-star"></i>
+                  <div>
+                    <div class="watchlist-symbol">${stock.symbol}</div>
+                    <div class="watchlist-name">${stock.name}</div>
+                  </div>
+                </div>
+                <div class="watchlist-price">
+                  <div class="watchlist-current-price">${Utils.formatCurrency(stock.price)}</div>
+                  <div class="watchlist-change ${changeClass}">
+                    ${changeIcon ? `<i class="${changeIcon}"></i>` : ''}
+                    ${Utils.formatCurrency(Math.abs(stock.change), true)} 
+                    (${Utils.formatPercent(stock.changePercent, true)})
+                  </div>
+                </div>
+              `;
+              
+              container.appendChild(watchlistItem);
+            });
+          },
+
+          // Update current time
+          updateTime: function() {
+            const timeElement = document.getElementById('current-time');
+            if (timeElement) {
+              const now = new Date();
+              timeElement.textContent = now.toLocaleTimeString();
+            }
+          },
+
+          // Start time updater
+          startTimeUpdater: function() {
+            setInterval(() => {
+              this.updateTime();
+            }, 1000);
+          },
+
+          // Update portfolio metrics
+          updatePortfolioMetrics: function() {
+            const holdings = InvestmentData.stockHoldings;
+            const totalValue = holdings.reduce((sum, stock) => sum + stock.value, 0);
+            const totalCost = holdings.reduce((sum, stock) => sum + (stock.avgCost * stock.shares), 0);
+            const totalGainLoss = totalValue - totalCost;
+            const totalGainLossPercent = (totalGainLoss / totalCost) * 100;
+
+            document.getElementById('portfolio-value').textContent = Utils.formatCurrency(totalValue);
+            
+            const changeElement = document.getElementById('portfolio-change');
+            const changeClass = Utils.getChangeClass(totalGainLoss);
+            const changeIcon = Utils.getChangeIcon(totalGainLoss);
+            changeElement.className = `metric-change ${changeClass}`;
+            changeElement.innerHTML = `
+              ${changeIcon ? `<i class="${changeIcon}"></i>` : ''}
+              ${Utils.formatCurrency(Math.abs(totalGainLoss), true)} 
+              (${Utils.formatPercent(totalGainLossPercent, true)})
+            `;
+          },
+
+          // Handle buy stock button click
+          handleBuyStock: function() {
+            this.showNotification('Trading interface would open here');
+          },
+
+          // Handle refresh button click
+          handleRefresh: function() {
+            this.renderMarketIndices();
+            this.renderStockHoldings();
+            this.renderWatchlist();
+            this.updatePortfolioMetrics();
+            this.showNotification('Market data refreshed');
+          },
+
+          // Handle add to watchlist
+          handleAddToWatchlist: function(symbol, name) {
+            const newStock = {
+              symbol: symbol.toUpperCase(),
+              name: name || `${symbol.toUpperCase()} Company`,
+              price: Math.random() * 500 + 50,
+              change: (Math.random() - 0.5) * 10,
+              changePercent: (Math.random() - 0.5) * 5
+            };
+            
+            InvestmentData.watchlist.unshift(newStock);
+            this.renderWatchlist();
+            this.showNotification(`${symbol.toUpperCase()} added to watchlist`);
+          },
+
+          // Show notification
+          showNotification: function(message) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+              position: fixed;
+              top: 20px;
+              right: 20px;
+              background: var(--success);
+              color: white;
+              padding: 12px 20px;
+              border-radius: var(--radius);
+              z-index: 1000;
+              font-size: 14px;
+              font-weight: 500;
+              box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+              transform: translateX(100%);
+              transition: transform 0.3s ease;
+            `;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+              notification.style.transform = 'translateX(0)';
+            }, 100);
+            
+            setTimeout(() => {
+              notification.style.transform = 'translateX(100%)';
+              setTimeout(() => {
+                document.body.removeChild(notification);
+              }, 300);
+            }, 3000);
+          }
+        };
+
+        // Main application controller
+        const App = {
+          
+          // Initialize the application
+          init: function() {
+            this.setupNavigation();
+            this.setupEventListeners();
+            
+            // Show finance dashboard by default
+            this.showDashboard('finance');
+          },
+
+          // Setup tab navigation
+          setupNavigation: function() {
+            const navTabs = document.querySelectorAll('.nav-tab');
+            
+            navTabs.forEach(tab => {
+              tab.addEventListener('click', (e) => {
+                const tabName = e.currentTarget.getAttribute('data-tab');
+                this.switchTab(tabName);
+              });
+            });
+          },
+
+          // Setup event listeners
+          setupEventListeners: function() {
+            // Finance dashboard events
+            const addTransactionBtn = document.getElementById('add-transaction-btn');
+            if (addTransactionBtn) {
+              addTransactionBtn.addEventListener('click', () => {
+                FinanceDashboard.handleAddTransaction();
+              });
+            }
+
+            // Investment dashboard events
+            const buyStockBtn = document.getElementById('buy-stock-btn');
+            if (buyStockBtn) {
+              buyStockBtn.addEventListener('click', () => {
+                InvestmentDashboard.handleBuyStock();
+              });
+            }
+
+            const refreshBtn = document.getElementById('refresh-btn');
+            if (refreshBtn) {
+              refreshBtn.addEventListener('click', () => {
+                InvestmentDashboard.handleRefresh();
+              });
+            }
+
+            // Watchlist search functionality
+            const watchlistInput = document.getElementById('watchlist-input');
+            if (watchlistInput) {
+              watchlistInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                  const symbol = e.target.value.trim();
+                  if (symbol) {
+                    InvestmentDashboard.handleAddToWatchlist(symbol);
+                    e.target.value = '';
+                  }
+                }
+              });
+            }
+
+            const addToWatchlistBtn = document.getElementById('add-watchlist-btn');
+            if (addToWatchlistBtn) {
+              addToWatchlistBtn.addEventListener('click', () => {
+                const input = document.getElementById('watchlist-input');
+                const symbol = input.value.trim();
+                if (symbol) {
+                  InvestmentDashboard.handleAddToWatchlist(symbol);
+                  input.value = '';
+                }
+              });
+            }
+          },
+
+          // Switch between tabs
+          switchTab: function(tabName) {
+            // Update nav tabs
+            const navTabs = document.querySelectorAll('.nav-tab');
+            navTabs.forEach(tab => {
+              if (tab.getAttribute('data-tab') === tabName) {
+                tab.classList.add('active');
+              } else {
+                tab.classList.remove('active');
+              }
+            });
+
+            // Show corresponding dashboard
+            this.showDashboard(tabName);
+          },
+
+          // Show specific dashboard
+          showDashboard: function(dashboardName) {
+            const dashboards = document.querySelectorAll('.dashboard');
+            
+            dashboards.forEach(dashboard => {
+              if (dashboard.id === `${dashboardName}-dashboard`) {
+                dashboard.classList.add('active');
+                
+                // Initialize dashboard if not already done
+                if (dashboardName === 'finance' && !dashboard.dataset.initialized) {
+                  FinanceDashboard.init();
+                  setTimeout(() => {
+                    ChartUtils.createSpendingChart();
+                    ChartUtils.createTrendsChart();
+                  }, 100);
+                  dashboard.dataset.initialized = 'true';
+                } else if (dashboardName === 'investments' && !dashboard.dataset.initialized) {
+                  InvestmentDashboard.init();
+                  setTimeout(() => {
+                    ChartUtils.createPortfolioChart();
+                    ChartUtils.createAllocationChart();
+                  }, 200);
+                  dashboard.dataset.initialized = 'true';
+                }
+              } else {
+                dashboard.classList.remove('active');
+              }
+            });
+          }
+        };
+
+        // Initialize the application when DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+          App.init();
+        });
+
+        // Handle keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+          if ((e.ctrlKey || e.metaKey) && e.key === '1') {
+            e.preventDefault();
+            App.switchTab('finance');
+          }
+          if ((e.ctrlKey || e.metaKey) && e.key === '2') {
+            e.preventDefault();
+            App.switchTab('investments');
+          }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ꪜeraֆpend-Personal Finance</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter','ui-sans-serif','system-ui'] },
+          colors: { brand: { 50:'#f6f6fb',100:'#efeff8',500:'#6b46ff' } }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans">
+
+  <!-- Top bar -->
+  <header class="px-6 py-4 border-b bg-white/60 sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <div style="width: 50px; height: 50px;border-radius: 12px;overflow: hidden;"><img src="veraspend.jpeg" alt=""></div>
+        <div>
+          <h1 style="font-size: 40px;" class="text-lg font-semibold">ꪜeraֆpend<span class="text-indigo-500">.</span></h1>
+          <p style="margin-top: 4px;" class="text-xs text-gray-500">Organize & simplify your finances</p>
+        </div>
+      </div>
+
+      <nav class="hidden md:flex gap-6 items-center text-sm text-gray-600">
+        <a class="hover:text-gray-900" href="Primes.html">Why Primes</a>
+        <a class="hover:text-gray-900" href="myfin.html">Your Finances</a>
+        <a class="hover:text-gray-900" href="Contact.html">Contact us</a>
+        <button class="px-3 py-1 rounded-md border" onclick="window.location.href='login.html'">Login</button>
+
+        <button class="px-4 py-1 rounded-md bg-indigo-600 text-white">Join</button>
+      </nav>
+
+      <button id="mobileMenuBtn" class="md:hidden p-2 rounded-md bg-white soft-border">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-6 py-10 grid grid-cols-12 gap-6">
+
+    <!-- Left column (stats & side tiles) -->
+    <aside class="col-span-12 lg:col-span-2 space-y-6 hidden lg:block">
+      <div class="soft-border p-6 bg-white">
+        <h3 class="text-sm text-gray-500">Digital Solutions</h3>
+        <p class="text-3xl font-extrabold mt-4">15K</p>
+        <p class="text-xs text-gray-500 mt-2">Digital industry is growing fast and finance industry need better solutions.</p>
+      </div>
+
+      <div class="soft-border p-6 bg-white">
+        <h4 class="text-sm text-gray-500">Digital Experience</h4>
+        <p class="text-4xl font-bold mt-4">500</p>
+        <p class="text-xs text-gray-500 mt-2">We provide best customer imperatives without state of the art.</p>
+      </div>
+
+      <div class="soft-border p-4 bg-white flex items-center gap-3">
+        <div class="flex-1">
+          <p class="text-xs text-gray-500">Secure Retirement</p>
+          <p class="text-xl font-semibold mt-2">128,7K</p>
+          <p class="text-xs text-gray-400">Asset generated</p>
+        </div>
+        <div class="w-16 h-16 rounded-lg glass flex items-center justify-center">📈</div>
+      </div>
+    </aside>
+
+    <!-- Center hero -->
+    <section class="col-span-12 lg:col-span-8 bg-white soft-border p-10 relative overflow-hidden">
+      <div class="grid grid-cols-12 gap-6 items-center">
+        <div class="col-span-12 md:col-span-7">
+          <h2 class="text-4xl font-extrabold leading-tight">Effortlessly Organize<br/>and Simplify Your<br/>Personal Finances</h2>
+          <p class="text-gray-500 mt-4">Automatically track your expenses, set budgets, and achieve your financial goals.</p>
+
+          <div class="mt-6 flex gap-3">
+            <button class="px-5 py-2 rounded-md bg-indigo-600 text-white font-medium">Get Access</button>
+            <button class="px-5 py-2 rounded-md border">Explore our Solution</button>
+          </div>
+        </div>
+
+        <!-- Floating phone (right) -->
+        <div class="col-span-12 md:col-span-5 flex justify-center md:justify-end">
+          <div id="phoneWrap" class="relative w-64 h-[500px] transform transition-transform will-change-transform">
+            <div class="absolute inset-0 rounded-3xl bg-gradient-to-br from-pink-50 to-indigo-50 -z-10 shadow-lg"></div>
+            <img id="phoneMock" src="home.jpeg" alt="phone mock" style="height: 500px; border-radius: 12px;"/>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sub-grid below hero -->
+      <div class="mt-8 grid grid-cols-3 gap-4">
+        <div class="col-span-3 sm:col-span-1 soft-border p-4 bg-white">
+          <h5 class="text-xs text-gray-500">Complete Revenue This Year</h5>
+          <p class="text-2xl font-bold mt-2">4.93%</p>
+          <p class="text-xs text-gray-400">-2.3%</p>
+        </div>
+
+        <div class="col-span-3 sm:col-span-1 soft-border p-4 bg-white">
+          <h5 class="text-xs text-gray-500">Transaction History</h5>
+          <p class="text-xl font-semibold mt-2">$11,642</p>
+          <p class="text-xs text-gray-400">Last 30 days</p>
+        </div>
+
+        <div class="col-span-3 sm:col-span-1 soft-border p-4 bg-white">
+          <h5 class="text-xs text-gray-500">New Clients</h5>
+          <p class="text-2xl font-bold mt-2">321</p>
+          <p class="text-xs text-gray-400">Reach rate 8.5%</p>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Right column (promotional panels) -->
+    <aside class="col-span-12 lg:col-span-2 space-y-6 hidden lg:block">
+      <div class="soft-border p-6 bg-white">
+        <h3 class="text-sm text-gray-500">Check our Business Model</h3>
+        <h4 class="text-lg font-semibold mt-3">build with AI</h4>
+        <p class="text-xs text-gray-400 mt-3">AI is the future of Mobile apps. We build our Mobile application powered by AI to give better user experience to our customers.</p>
+        <ul class="mt-4 text-sm space-y-2">
+          <li class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-green-400"></span> No Cost Until You Hire</li>
+          <li class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-green-400"></span> Safe and Secure</li>
+        </ul>
+      </div>
+
+      <div class="soft-border p-6 bg-white">
+        <h5 class="text-sm text-gray-500">Analytics</h5>
+        <div class="mt-3 text-3xl font-bold">12,3K</div>
+        <p class="text-xs text-gray-400 mt-2">Spending, Allocation, Amount</p>
+      </div>
+       <button class="px-5 py-2 rounded-md bg-indigo-600 text-white font-medium">ASK AI</button>
+    </aside>
+
+  
+
+  </main>
+
+
+
+
+  <!-- Mobile menu overlay -->
+  <div id="mobileMenu" class="fixed inset-0 bg-black/40 backdrop-blur-sm hidden z-40">
+    <div class="absolute top-14 right-6 w-72 bg-white soft-border p-4">
+      <nav class="flex flex-col gap-3">
+        <a href="#" class="py-2 px-2 rounded hover:bg-gray-50">Find Project</a>
+        <a href="#" class="py-2 px-2 rounded hover:bg-gray-50">Find Freelancer</a>
+        <a href="#" class="py-2 px-2 rounded hover:bg-gray-50">Why Primes</a>
+        <a href="#" class="py-2 px-2 rounded hover:bg-gray-50">Enterprise</a>
+        <a href="#" class="py-2 px-2 rounded hover:bg-gray-50">Contact us</a>
+      </nav>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+  <script type="module">
+    import runChat from './gemini.js';
+    const avatar = document.getElementById('chatbot-avatar');
+    const interfaceBox = document.getElementById('chatbot-interface');
+    avatar.onclick = () => {
+      interfaceBox.style.display = interfaceBox.style.display === 'none' ? 'block' : 'none';
+    };
+    const form = document.getElementById('chatbot-form');
+    const input = document.getElementById('chatbot-input');
+    const messages = document.getElementById('chatbot-messages');
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      const userMsg = input.value.trim();
+      if (!userMsg) return;
+      messages.innerHTML += `<div style='margin-bottom:8px;text-align:right;'><span style='background:#e0e7ff;color:#3730a3;padding:6px 12px;border-radius:12px;display:inline-block;'>${userMsg}</span></div>`;
+      input.value = '';
+      messages.scrollTop = messages.scrollHeight;
+      messages.innerHTML += `<div style='margin-bottom:8px;text-align:left;'><span style='background:#f3f4f6;color:#6b46ff;padding:6px 12px;border-radius:12px;display:inline-block;'>...</span></div>`;
+      messages.scrollTop = messages.scrollHeight;
+      try {
+        const botMsg = await runChat(userMsg);
+        messages.lastChild.innerHTML = `<span style='background:#f3f4f6;color:#6b46ff;padding:6px 12px;border-radius:12px;display:inline-block;'>${botMsg}</span>`;
+      } catch {
+        messages.lastChild.innerHTML = `<span style='background:#fee2e2;color:#b91c1c;padding:6px 12px;border-radius:12px;display:inline-block;'>Error. Please try again.</span>`;
+      }
+      messages.scrollTop = messages.scrollHeight;
+    };
+  </script>
+</body>
+</html>

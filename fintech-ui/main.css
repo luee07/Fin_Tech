@@ -1,0 +1,155 @@
+/* main.css for chat and dashboard UI */
+
+.main {
+  background: #f9fafb;
+  min-height: 100vh;
+  font-family: 'Inter', sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 600px;
+  padding: 24px 0 8px 0;
+}
+
+.nav p {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #6b46ff;
+}
+
+.main-container {
+  background: #fff;
+  border-radius: 24px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+  padding: 32px;
+  max-width: 600px;
+  width: 100%;
+  margin-bottom: 32px;
+}
+
+.greet {
+  text-align: center;
+  margin-bottom: 24px;
+}
+.greet span {
+  color: #6b46ff;
+  font-weight: 600;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+.card {
+  background: #f3f4f6;
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.95rem;
+  color: #3730a3;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.card img {
+  width: 32px;
+  height: 32px;
+}
+
+.result {
+  margin-bottom: 24px;
+}
+.result-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 600;
+  color: #6b46ff;
+  margin-bottom: 8px;
+}
+.result-title img {
+  width: 32px;
+  height: 32px;
+}
+.result-data {
+  background: #f3f4f6;
+  border-radius: 12px;
+  padding: 16px;
+  color: #3730a3;
+  min-height: 60px;
+}
+.loader {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: center;
+  margin: 16px 0;
+}
+.loader hr {
+  width: 80%;
+  border: none;
+  height: 4px;
+  background: #e0e7ff;
+  border-radius: 2px;
+  animation: loaderAnim 1.2s infinite alternate;
+}
+@keyframes loaderAnim {
+  0% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+.main-bottom {
+  margin-top: 32px;
+}
+.search-box {
+  display: flex;
+  align-items: center;
+  background: #f3f4f6;
+  border-radius: 12px;
+  padding: 8px 16px;
+  gap: 12px;
+}
+.search-box input[type="text"] {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 1rem;
+  padding: 8px 0;
+  outline: none;
+}
+.search-box img {
+  width: 28px;
+  height: 28px;
+  margin-left: 8px;
+}
+.search-box label {
+  margin-bottom: 0;
+}
+.bottom-info {
+  text-align: center;
+  color: #a0aec0;
+  font-size: 0.9rem;
+  margin-top: 18px;
+}
+
+@media (max-width: 700px) {
+  .main-container {
+    padding: 16px;
+    border-radius: 12px;
+  }
+  .nav {
+    padding: 16px 0 4px 0;
+  }
+  .cards {
+    grid-template-columns: 1fr;
+  }
+}
